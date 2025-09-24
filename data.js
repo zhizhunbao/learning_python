@@ -1235,9 +1235,14 @@ my_project/
 from my_project.models.cnn import CNNModel  # Works but verbose
 from my_project.models import CNNModel      # This WON'T work!
 
+# ❌ Dangerous: Can't prevent wildcard imports
+# Without __init__.py, users might do:
+from my_project.models.cnn import *  # Imports everything!
+# No __all__ to control what gets imported
+
 # ❌ No package-level attributes
 # Can't do: my_project.__version__
-# Can't control what gets imported`,
+# Can't control what gets imported publicly`,
                 zh: `# ❌ 旧思维："总是需要__init__.py"
 # 在Python 3.3+中没有__init__.py也能工作：
 my_project/
@@ -1251,79 +1256,104 @@ my_project/
 from my_project.models.cnn import CNNModel  # 能工作但冗长
 from my_project.models import CNNModel      # 这不会工作！
 
+# ❌ 危险：无法防止通配符导入
+# 没有__init__.py，用户可能会：
+from my_project.models.cnn import *  # 导入所有内容！
+# 没有__all__来控制导入什么
+
 # ❌ 没有包级别属性
 # 不能：my_project.__version__
-# 无法控制导入什么`
+# 无法控制公开导入什么`
             },
             bestPractice: {
-                en: `# ✅ Modern Best Practice: Use __init__.py for control
+                en: `# ✅ Modern Best Practice: Use __init__.py for import control
 ai_project/
-├── __init__.py      # For package control
+├── __init__.py      # Controls package-level imports
 ├── models/
-│   ├── __init__.py  # For clean imports
+│   ├── __init__.py  # Controls wildcard imports with __all__
 │   └── neural_net.py
 └── utils/           # No __init__.py = namespace package
     └── data_loader.py
 
-# When to use __init__.py:
-# 1. Main package (always recommended)
-# 2. Want clean imports: from models import NeuralNet
-# 3. Package metadata: __version__, __author__
-# 4. Initialization code
-
+# CRITICAL: __init__.py prevents dangerous imports
 # models/__init__.py
-from .neural_net import NeuralNetwork
-__all__ = ['NeuralNetwork']
+from .neural_net import NeuralNetwork, ModelTrainer
+# Control what's available for import:
+__all__ = ['NeuralNetwork']  # Only this gets imported with *
+
+# This protects users from dangerous wildcard imports:
+# from ai_project.models import *  # Only imports NeuralNetwork!
+
+# models/neural_net.py
+class NeuralNetwork:
+    def __init__(self): pass
+
+class ModelTrainer:  # Private - not in __all__
+    def __init__(self): pass
+
+def _helper_function():  # Private by convention
+    pass
 
 # __init__.py (main package)
 from .models import NeuralNetwork
 __version__ = "1.0.0"
 __author__ = "Algonquin AI Team"
+__all__ = ['NeuralNetwork']  # Control package-level imports
 
-# Clean modern imports
-from ai_project import NeuralNetwork  # Works!
-from ai_project.utils.data_loader import load_data  # Also works!`,
-                zh: `# ✅ 现代最佳实践：使用__init__.py进行控制
+# Safe, controlled imports
+from ai_project import NeuralNetwork  # ✅ Safe!
+from ai_project import *  # ✅ Only imports NeuralNetwork!`,
+                zh: `# ✅ 现代最佳实践：使用__init__.py控制导入
 ai_project/
-├── __init__.py      # 包控制
+├── __init__.py      # 控制包级别导入
 ├── models/
-│   ├── __init__.py  # 清洁导入
+│   ├── __init__.py  # 用__all__控制通配符导入
 │   └── neural_net.py
 └── utils/           # 没有__init__.py = 命名空间包
     └── data_loader.py
 
-# 何时使用__init__.py：
-# 1. 主包（总是推荐）
-# 2. 想要简洁导入：from models import NeuralNet
-# 3. 包元数据：__version__, __author__
-# 4. 初始化代码
-
+# 关键：__init__.py防止危险导入
 # models/__init__.py
-from .neural_net import NeuralNetwork
-__all__ = ['NeuralNetwork']
+from .neural_net import NeuralNetwork, ModelTrainer
+# 控制可导入的内容：
+__all__ = ['NeuralNetwork']  # 只有这个会被*导入
+
+# 这保护用户免受危险的通配符导入：
+# from ai_project.models import *  # 只导入NeuralNetwork！
+
+# models/neural_net.py
+class NeuralNetwork:
+    def __init__(self): pass
+
+class ModelTrainer:  # 私有 - 不在__all__中
+    def __init__(self): pass
+
+def _helper_function():  # 按惯例私有
+    pass
 
 # __init__.py (主包)
 from .models import NeuralNetwork
 __version__ = "1.0.0"
 __author__ = "亚岗昆AI团队"
+__all__ = ['NeuralNetwork']  # 控制包级别导入
 
-# 简洁的现代导入
-from ai_project import NeuralNetwork  # 工作！
-from ai_project.utils.data_loader import load_data  # 也工作！`
+# 安全、受控的导入
+from ai_project import NeuralNetwork  # ✅ 安全！
+from ai_project import *  # ✅ 只导入NeuralNetwork！`
             },
             tips: [
                 { 
-                    en: "💡 Python 3.3+ Namespace Packages (PEP 420)\n\n```python\n# No __init__.py needed for basic imports:\nmy_project/\n└── utils/\n    └── helper.py\n\n# This works:\nfrom my_project.utils.helper import my_function\n```", 
-                    zh: "💡 Python 3.3+ 命名空间包 (PEP 420)\n\n```python\n# 基本导入不需要__init__.py：\nmy_project/\n└── utils/\n    └── helper.py\n\n# 这样工作：\nfrom my_project.utils.helper import my_function\n```" 
+                    en: "💡 Use __all__ to control wildcard imports safely\n\n```python\n# mypackage/__init__.py\nfrom .module1 import PublicClass\nfrom .module2 import AnotherClass, helper_function\n\n# Only these get imported with 'from mypackage import *'\n__all__ = ['PublicClass', 'AnotherClass']\n# helper_function is NOT included - stays private!\n```", 
+                    zh: "💡 使用__all__安全控制通配符导入\n\n```python\n# mypackage/__init__.py\nfrom .module1 import PublicClass\nfrom .module2 import AnotherClass, helper_function\n\n# 只有这些会被'from mypackage import *'导入\n__all__ = ['PublicClass', 'AnotherClass']\n# helper_function不包含 - 保持私有！\n```" 
                 },
                 { 
-                    en: "💡 When to still use __init__.py\n\n```python\n# Use __init__.py when you need:\n# 1. Clean imports: from package import Class\n# 2. Package metadata: __version__\n# 3. Initialization code\n# 4. Control over public API with __all__\n\n# models/__init__.py\nfrom .neural_net import NeuralNetwork\n__all__ = ['NeuralNetwork']\n```", 
-                    zh: "💡 何时仍需使用__init__.py\n\n```python\n# 当你需要时使用__init__.py：\n# 1. 简洁导入：from package import Class\n# 2. 包元数据：__version__\n# 3. 初始化代码\n# 4. 用__all__控制公共API\n\n# models/__init__.py\nfrom .neural_net import NeuralNetwork\n__all__ = ['NeuralNetwork']\n```" 
+                    en: "💡 Protect your users from dangerous imports\n\n```python\n# Without __init__.py: DANGEROUS!\n# Users can do: from mypackage.internal import *\n# Imports everything, including private functions!\n\n# With __init__.py + __all__: SAFE!\n# from mypackage import *  # Only imports what you allow\n```", 
+                    zh: "💡 保护用户免受危险导入\n\n```python\n# 没有__init__.py：危险！\n# 用户可以：from mypackage.internal import *\n# 导入所有内容，包括私有函数！\n\n# 有__init__.py + __all__：安全！\n# from mypackage import *  # 只导入你允许的\n```" 
                 }
             ],
             summary: {
-                en: "🎯 **Key Takeaway**:\n• Python 3.3+ supports namespace packages without __init__.py files\n• However, __init__.py still provides control over imports and package metadata\n• Use __init__.py when you want clean imports like `from package import Class`!",
-                zh: "🎯 **核心要点**：\n• Python 3.3+支持无__init__.py文件的命名空间包\n• 但__init__.py仍提供导入控制和包元数据功能\n• 想要`from package import Class`这样简洁导入时使用__init__.py！"
+                en: "🎯 **Key Takeaway**:\n• **__init__.py is essential for controlling wildcard imports** with `__all__`\n• Without it, users can `from your_module import *` and import everything!\n• **Always use __init__.py + __all__** to define what's safe to import publicly!",
+                zh: "🎯 **核心要点**：\n• **__init__.py对用`__all__`控制通配符导入至关重要**\n• 没有它，用户可以`from your_module import *`导入所有内容！\n• **始终使用__init__.py + __all__**来定义可安全公开导入的内容！"
             }
         },
         {
@@ -1332,29 +1362,39 @@ from ai_project.utils.data_loader import load_data  # 也工作！`
             subtitle: { en: "The Gateway to Python's Power", zh: "通往Python力量的大门" },
             description: { en: "Python import system - master this to use any AI library efficiently! 🔑", zh: "Python导入系统 - 掌握它才能高效使用任何AI库！🔑" },
             badExample: {
-                en: `# ❌ Wrong import syntax
-import tensorflow.keras.layers.Dense  # Can't import like this!
-from torch import *  # Imports everything - pollution!
-import numpy  # Should use alias
+                en: `# ❌ Wildcard imports (namespace pollution!)
+from torch import *  # Imports 1000+ names!
+from numpy import *
+from pandas import *
+# Now you have naming conflicts: array(), mean(), etc.
 
-# ❌ Mixed styles
-import pandas
-from sklearn import model_selection
-from tensorflow.keras import layers as keras_layers  # Too verbose!
+# ❌ Wrong import syntax
+import tensorflow.keras.layers.Dense  # Can't import like this!
+import numpy  # Should use alias for long usage
+
+# ❌ Naming conflicts example
+from math import *  # Imports sqrt, sin, cos, etc.
+from numpy import *  # Also imports sqrt, sin, cos, etc.
+# Which sqrt() are you using? math.sqrt or numpy.sqrt?
 
 # ❌ Imports in wrong place
 def train_model():
     import torch  # Should be at top!
     # training code...`,
-                zh: `# ❌ 错误的导入语法
-import tensorflow.keras.layers.Dense  # 不能这样导入！
-from torch import *  # 导入所有内容 - 污染命名空间！
-import numpy  # 应该使用别名
+                zh: `# ❌ 通配符导入（命名空间污染！）
+from torch import *  # 导入1000多个名称！
+from numpy import *
+from pandas import *
+# 现在有命名冲突：array(), mean()等
 
-# ❌ 混合风格
-import pandas
-from sklearn import model_selection
-from tensorflow.keras import layers as keras_layers  # 太冗长！
+# ❌ 错误的导入语法
+import tensorflow.keras.layers.Dense  # 不能这样导入！
+import numpy  # 长期使用应该用别名
+
+# ❌ 命名冲突示例
+from math import *  # 导入sqrt, sin, cos等
+from numpy import *  # 也导入sqrt, sin, cos等
+# 你使用的是哪个sqrt()？math.sqrt还是numpy.sqrt？
 
 # ❌ 导入位置错误
 def train_model():
@@ -1362,19 +1402,31 @@ def train_model():
     # 训练代码...`
             },
             bestPractice: {
-                en: `# ✅ Best Practice: Standard import order
+                en: `# ✅ Best Practice: Clean, specific imports
+# Standard library first
 import os
 import json
+import math
 
-# Third-party libraries
+# Third-party libraries with aliases
 import numpy as np
 import pandas as pd
 import torch
+import torch.nn as nn
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
-# Project modules
+# Project modules (specific imports)
 from .models import NeuralNetwork
-from .utils import load_config
+from .utils import load_config, preprocess_data
+
+# Clear usage - no naming conflicts!
+def calculate_accuracy(predictions, targets):
+    # Clear which functions we're using
+    result = accuracy_score(targets, predictions)
+    loss = nn.CrossEntropyLoss()(predictions, targets)
+    std_dev = np.std(predictions)
+    return result, loss, std_dev
 
 # AI project structure
 class ModelTrainer:
@@ -1384,19 +1436,31 @@ class ModelTrainer:
     def train(self, data_path):
         data = pd.read_csv(data_path)
         return self.model.fit(data)`,
-                zh: `# ✅ 最佳实践：标准导入顺序
+                zh: `# ✅ 最佳实践：清晰、具体的导入
+# 标准库优先
 import os
 import json
+import math
 
-# 第三方库
+# 第三方库使用别名
 import numpy as np
 import pandas as pd
 import torch
+import torch.nn as nn
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
-# 项目模块
+# 项目模块（具体导入）
 from .models import NeuralNetwork
-from .utils import load_config
+from .utils import load_config, preprocess_data
+
+# 清晰使用 - 没有命名冲突！
+def calculate_accuracy(predictions, targets):
+    # 清楚我们使用的是哪些函数
+    result = accuracy_score(targets, predictions)
+    loss = nn.CrossEntropyLoss()(predictions, targets)
+    std_dev = np.std(predictions)
+    return result, loss, std_dev
 
 # AI项目结构
 class ModelTrainer:
@@ -1409,17 +1473,17 @@ class ModelTrainer:
             },
             tips: [
                 { 
-                    en: "💡 Put all imports at the top\n\n```python\n# Standard library first\nimport os\nimport json\n\n# Third-party libraries\nimport numpy as np\nimport pandas as pd\n\n# Your own modules last\nfrom .models import MyModel\n```", 
-                    zh: "💡 将所有导入语句放在顶部\n\n```python\n# 标准库优先\nimport os\nimport json\n\n# 第三方库\nimport numpy as np\nimport pandas as pd\n\n# 自己的模块最后\nfrom .models import MyModel\n```" 
+                    en: "💡 Never use wildcard imports (*)\n\n```python\n# ❌ BAD: Creates naming conflicts\nfrom numpy import *\nfrom math import *\n# Now sqrt() is ambiguous!\n\n# ✅ GOOD: Use module names\nimport numpy as np\nimport math\nnp.sqrt(16)  # Clear!\nmath.sqrt(16)  # Clear!\n```", 
+                    zh: "💡 绝不使用通配符导入(*)\n\n```python\n# ❌ 糟糕：创建命名冲突\nfrom numpy import *\nfrom math import *\n# 现在sqrt()不明确！\n\n# ✅ 好：使用模块名\nimport numpy as np\nimport math\nnp.sqrt(16)  # 清晰！\nmath.sqrt(16)  # 清晰！\n```" 
                 },
                 { 
-                    en: "💡 Use specific imports for clarity\n\n```python\n# Clear and specific\nfrom sklearn.model_selection import train_test_split\nfrom torch import nn, optim\n\n# Don't do: from sklearn import *\n# Better: import what you need\n```", 
-                    zh: "💡 使用具体导入以提高清晰度\n\n```python\n# 清晰具体\nfrom sklearn.model_selection import train_test_split\nfrom torch import nn, optim\n\n# 不要：from sklearn import *\n# 更好：导入你需要的\n```" 
+                    en: "💡 Use specific imports for clarity\n\n```python\n# ✅ GOOD: Specific imports\nfrom sklearn.model_selection import train_test_split\nfrom torch import nn, optim\n\n# ❌ BAD: Wildcard imports\nfrom sklearn import *  # Imports 100+ names!\nfrom torch import *    # Namespace pollution!\n```", 
+                    zh: "💡 使用具体导入以提高清晰度\n\n```python\n# ✅ 好：具体导入\nfrom sklearn.model_selection import train_test_split\nfrom torch import nn, optim\n\n# ❌ 糟糕：通配符导入\nfrom sklearn import *  # 导入100多个名称！\nfrom torch import *    # 命名空间污染！\n```" 
                 }
             ],
             summary: {
-                en: "🎯 **Key Takeaway**:\n• Import organization reflects code quality and follows PEP 8 standards\n• Order: standard library → third-party libraries → local modules\n• Avoid wildcard imports (*) and use specific imports for better clarity!",
-                zh: "🎯 **核心要点**：\n• 导入组织反映代码质量并遵循PEP 8标准\n• 顺序：标准库→第三方库→本地模块\n• 避免通配符导入(*)，使用具体导入提高清晰度！"
+                en: "🎯 **Key Takeaway**:\n• **NEVER use `from module import *`** - causes naming conflicts and namespace pollution\n• **GOOD: `from module import specific_function`** - imports only what you need\n• **GOOD: `import module_name`** - keeps namespaces clear\n• This prevents naming problems that can break AI models and data processing pipelines!",
+                zh: "🎯 **核心要点**：\n• **绝不使用`from module import *`** - 导致命名冲突和命名空间污染\n• **好：`from module import specific_function`** - 只导入需要的内容\n• **好：`import module_name`** - 保持命名空间清晰\n• 这防止可能破坏AI模型和数据处理管道的命名问题！"
             }
         },
         {
@@ -1526,6 +1590,262 @@ models/saved/
             summary: {
                 en: "🎯 **Key Takeaway**:\n• __pycache__ folders contain compiled bytecode that speeds up Python imports\n• They're automatically generated and safe to delete - Python will recreate them\n• Always add __pycache__/ to your .gitignore file!",
                 zh: "🎯 **核心要点**：\n• __pycache__文件夹包含加速Python导入的编译字节码\n• 它们自动生成且可安全删除 - Python会重新创建\n• 始终将__pycache__/添加到.gitignore文件！"
+            }
+        },
+        {
+            id: "venv",
+            title: { en: "🔄 Virtual Environment Hell", zh: "🔄 虚拟环境地狱" },
+            subtitle: { en: "When pip install Breaks Everything", zh: "当pip install搞坏一切时" },
+            description: { en: "Python virtual environments - essential for AI projects but confusing for beginners! 🐍💼", zh: "Python虚拟环境 - 对AI项目至关重要但初学者容易困惑！🐍💼" },
+            badExample: {
+                en: `# ❌ Installing globally (dangerous!)
+pip install tensorflow  # Installs for everyone!
+pip install torch==1.8.0
+pip install torch==2.0.0  # Conflicts with above!
+
+# ❌ Wrong activation (Windows)
+# activate venv  # Missing path!
+# source venv/bin/activate  # Wrong OS command!
+
+# ❌ Forgetting to activate
+# pip install pandas  # Goes to global Python!
+# python train.py  # "ModuleNotFoundError: No module named 'pandas'"
+
+# ❌ Multiple Python versions chaos
+# python -m pip install numpy  # Python 3.8
+# python3 -m pip install numpy  # Python 3.9
+# py -3.10 -m pip install numpy  # Python 3.10
+# Where did my packages go?!`,
+                zh: `# ❌ 全局安装（危险！）
+pip install tensorflow  # 为所有人安装！
+pip install torch==1.8.0
+pip install torch==2.0.0  # 与上面冲突！
+
+# ❌ 错误激活（Windows）
+# activate venv  # 缺少路径！
+# source venv/bin/activate  # 错误的OS命令！
+
+# ❌ 忘记激活
+# pip install pandas  # 安装到全局Python！
+# python train.py  # "ModuleNotFoundError: No module named 'pandas'"
+
+# ❌ 多Python版本混乱
+# python -m pip install numpy  # Python 3.8
+# python3 -m pip install numpy  # Python 3.9
+# py -3.10 -m pip install numpy  # Python 3.10
+# 我的包去哪了？！`
+            },
+            bestPractice: {
+                en: `# ✅ Best Practice: Modern project isolation
+# Create virtual environment (modern convention)
+python -m venv .venv
+
+# Activate (Windows)
+.venv\\Scripts\\activate
+
+# Activate (Mac/Linux)
+source .venv/bin/activate
+
+# Verify activation - look for (.venv) in prompt
+(.venv) $ which python  # Should show .venv path
+(.venv) $ pip list  # Should be minimal
+
+# Install AI packages safely
+pip install --upgrade pip
+pip install torch torchvision
+pip install tensorflow
+pip install pandas numpy scikit-learn
+
+# Save dependencies
+pip freeze > requirements.txt
+
+# Deactivate when done
+deactivate
+
+# Standard .gitignore entry
+echo ".venv/" >> .gitignore
+
+# Recreate environment anywhere
+python -m venv .venv
+.venv\\Scripts\\activate  # Windows
+pip install -r requirements.txt`,
+                zh: `# ✅ 最佳实践：现代项目隔离
+# 创建虚拟环境（现代约定）
+python -m venv .venv
+
+# 激活（Windows）
+.venv\\Scripts\\activate
+
+# 激活（Mac/Linux）
+source .venv/bin/activate
+
+# 验证激活 - 在提示符中查找(.venv)
+(.venv) $ which python  # 应显示.venv路径
+(.venv) $ pip list  # 应该很少
+
+# 安全安装AI包
+pip install --upgrade pip
+pip install torch torchvision
+pip install tensorflow
+pip install pandas numpy scikit-learn
+
+# 保存依赖
+pip freeze > requirements.txt
+
+# 完成后停用
+deactivate
+
+# 标准.gitignore条目
+echo ".venv/" >> .gitignore
+
+# 在任何地方重新创建环境
+python -m venv .venv
+.venv\\Scripts\\activate  # Windows
+pip install -r requirements.txt`
+            },
+            tips: [
+                { 
+                    en: "💡 Always check if venv is active\n\n```bash\n# Look for (.venv) in your prompt:\n(.venv) C:\\Users\\Student> python\n\n# Or check Python path:\nwhich python\n# Should show: /path/to/your/.venv/bin/python\n```", 
+                    zh: "💡 始终检查venv是否激活\n\n```bash\n# 在提示符中查找(.venv)：\n(.venv) C:\\Users\\Student> python\n\n# 或检查Python路径：\nwhich python\n# 应显示：/path/to/your/.venv/bin/python\n```" 
+                },
+                { 
+                    en: "💡 Use requirements.txt for reproducibility\n\n```bash\n# Save current environment\npip freeze > requirements.txt\n\n# Share with teammates\ngit add requirements.txt\n\n# Recreate anywhere\npip install -r requirements.txt\n```", 
+                    zh: "💡 使用requirements.txt保证可重现性\n\n```bash\n# 保存当前环境\npip freeze > requirements.txt\n\n# 与队友分享\ngit add requirements.txt\n\n# 在任何地方重新创建\npip install -r requirements.txt\n```" 
+                }
+            ],
+            summary: {
+                en: "🎯 **Key Takeaway**:\n• Virtual environments prevent package conflicts and keep projects isolated\n• Always activate your venv before installing packages with pip\n• Use `requirements.txt` to share exact package versions with teammates!",
+                zh: "🎯 **核心要点**：\n• 虚拟环境防止包冲突并保持项目隔离\n• 用pip安装包前始终激活venv\n• 使用`requirements.txt`与队友分享确切的包版本！"
+            }
+        },
+        {
+            id: "path",
+            title: { en: "🗺️ PATH Environment Variable Chaos", zh: "🗺️ PATH环境变量混乱" },
+            subtitle: { en: "Why 'python' is not recognized as a command", zh: "为什么'python'不被识别为命令" },
+            description: { en: "PATH configuration nightmares - the #1 reason Python installations fail for beginners! 😵‍💫", zh: "PATH配置噩梦 - 初学者Python安装失败的头号原因！😵‍💫" },
+            badExample: {
+                en: `# ❌ Command not found errors
+C:\\> python
+'python' is not recognized as an internal or external command
+
+# ❌ Wrong Python version
+C:\\> python --version
+Python 2.7.18  # Wait, I installed Python 3.10!
+
+# ❌ Multiple Python installations
+C:\\Python38\\python.exe  # Old installation
+C:\\Python310\\python.exe  # New installation
+C:\\Users\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe  # Store version
+# Which one is running?!
+
+# ❌ pip confusion
+C:\\> pip install tensorflow
+# Installs to Python 2.7, but code runs on Python 3.10!
+
+# ❌ IDE vs Command Line differences
+# PyCharm works fine
+# Command line: "No module named 'pandas'"`,
+                zh: `# ❌ 命令未找到错误
+C:\\> python
+'python' 不是内部或外部命令
+
+# ❌ 错误的Python版本
+C:\\> python --version
+Python 2.7.18  # 等等，我安装的是Python 3.10！
+
+# ❌ 多个Python安装
+C:\\Python38\\python.exe  # 旧安装
+C:\\Python310\\python.exe  # 新安装
+C:\\Users\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe  # 商店版本
+# 运行的是哪一个？！
+
+# ❌ pip混乱
+C:\\> pip install tensorflow
+# 安装到Python 2.7，但代码在Python 3.10上运行！
+
+# ❌ IDE与命令行差异
+# PyCharm工作正常
+# 命令行："No module named 'pandas'"`
+            },
+            bestPractice: {
+                en: `# ✅ Best Practice: Clean PATH management
+
+# Windows: Check current PATH
+echo %PATH%
+
+# Find all Python installations
+where python
+where pip
+
+# Recommended Python installation path
+C:\\Python310\\  # Clean, predictable location
+
+# Manual PATH setup (Windows)
+# System Properties > Environment Variables
+# Add to PATH:
+C:\\Python310\\
+C:\\Python310\\Scripts\\
+
+# Verify installation
+python --version  # Should show Python 3.10.x
+pip --version     # Should show pip for Python 3.10
+
+# For AI development workflow
+python -m venv .venv
+.venv\\Scripts\\activate
+(.venv) C:\\> python --version  # Isolated environment
+(.venv) C:\\> pip install torch tensorflow pandas
+
+# Mac/Linux: Use pyenv for version management
+curl https://pyenv.run | bash
+pyenv install 3.10.8
+pyenv global 3.10.8`,
+                zh: `# ✅ 最佳实践：清洁PATH管理
+
+# Windows：检查当前PATH
+echo %PATH%
+
+# 找到所有Python安装
+where python
+where pip
+
+# 推荐的Python安装路径
+C:\\Python310\\  # 简洁、可预测的位置
+
+# 手动PATH设置（Windows）
+# 系统属性 > 环境变量
+# 添加到PATH：
+C:\\Python310\\
+C:\\Python310\\Scripts\\
+
+# 验证安装
+python --version  # 应显示Python 3.10.x
+pip --version     # 应显示Python 3.10的pip
+
+# AI开发工作流
+python -m venv .venv
+.venv\\Scripts\\activate
+(.venv) C:\\> python --version  # 隔离环境
+(.venv) C:\\> pip install torch tensorflow pandas
+
+# Mac/Linux：使用pyenv进行版本管理
+curl https://pyenv.run | bash
+pyenv install 3.10.8
+pyenv global 3.10.8`
+            },
+            tips: [
+                { 
+                    en: "💡 Use 'py' launcher on Windows\n\n```cmd\n# Instead of 'python', use 'py'\npy --version\npy -3.10 --version  # Specific version\npy -m pip install pandas\npy -m venv myenv\n\n# Lists all installed Python versions\npy --list\n```", 
+                    zh: "💡 在Windows上使用'py'启动器\n\n```cmd\n# 用'py'代替'python'\npy --version\npy -3.10 --version  # 特定版本\npy -m pip install pandas\npy -m venv myenv\n\n# 列出所有已安装的Python版本\npy --list\n```" 
+                },
+                { 
+                    en: "💡 Always use python -m pip instead of just pip\n\n```bash\n# This ensures you're using the right Python's pip\npython -m pip install tensorflow\npython -m pip list\npython -m pip freeze > requirements.txt\n\n# Avoids version confusion!\n```", 
+                    zh: "💡 始终使用python -m pip而不是仅pip\n\n```bash\n# 这确保你使用正确Python的pip\npython -m pip install tensorflow\npython -m pip list\npython -m pip freeze > requirements.txt\n\n# 避免版本混乱！\n```" 
+                }
+            ],
+            summary: {
+                en: "🎯 **Key Takeaway**:\n• PATH determines which Python version runs when you type 'python'\n• Use `py` launcher on Windows or `python -m` commands for clarity\n• Virtual environments solve most PATH-related issues by creating isolated environments!",
+                zh: "🎯 **核心要点**：\n• PATH决定输入'python'时运行哪个Python版本\n• 在Windows上使用`py`启动器或`python -m`命令以提高清晰度\n• 虚拟环境通过创建隔离环境解决大多数PATH相关问题！"
             }
         }
     ]
