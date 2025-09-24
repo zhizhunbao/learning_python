@@ -24,7 +24,7 @@ const contentData = {
 
     // Footer content
     footer: {
-        text1: { en: "&copy; 2024 Algonquin College AI Course - Python for AI Journey", zh: "&copy; 2024 亚岗昆学院AI课程 - Python与AI之旅" },
+        text1: { en: "&copy; 2025 Algonquin College AI Course - Python for AI Journey", zh: "&copy; 2025 亚岗昆学院AI课程 - Python与AI之旅" },
         text2: { en: "Learning Python Through History and Stories for Artificial Intelligence", zh: "通过历史和故事学习Python人工智能" }
     },
 
