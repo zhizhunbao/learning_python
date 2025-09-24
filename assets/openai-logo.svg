@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="50" height="50">
+  <circle cx="50" cy="50" r="40" fill="#412991" stroke="#10A37F" stroke-width="3"/>
+  <text x="50" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9" font-weight="bold">Open</text>
+  <text x="50" y="50" text-anchor="middle" fill="#10A37F" font-family="Arial, sans-serif" font-size="12" font-weight="bold">AI</text>
+  <circle cx="40" cy="60" r="4" fill="#10A37F"/>
+  <circle cx="50" cy="65" r="4" fill="white"/>
+  <circle cx="60" cy="60" r="4" fill="#10A37F"/>
+  <path d="M40,60 Q50,55 60,60" stroke="white" stroke-width="2" fill="none"/>
+</svg> 

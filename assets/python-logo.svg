@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="pythonGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3776ab;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ffd43b;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="pythonGrad2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffd43b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3776ab;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Python logo inspired design -->
+  <path d="M25,15 Q15,15 15,25 L15,40 Q15,50 25,50 L40,50 L40,35 Q40,25 50,25 L75,25 Q85,25 85,35 L85,50 Q85,60 75,60 L60,60 L60,75 Q60,85 50,85 L25,85 Q15,85 15,75 L15,60 Q15,50 25,50" fill="url(#pythonGrad1)"/>
+  
+  <path d="M75,85 Q85,85 85,75 L85,60 Q85,50 75,50 L60,50 L60,65 Q60,75 50,75 L25,75 Q15,75 15,65 L15,50 Q15,40 25,40 L40,40 L40,25 Q40,15 50,15 L75,15 Q85,15 85,25 L85,40 Q85,50 75,50" fill="url(#pythonGrad2)"/>
+  
+  <!-- Eyes -->
+  <circle cx="30" cy="30" r="3" fill="white"/>
+  <circle cx="70" cy="70" r="3" fill="white"/>
+</svg> 

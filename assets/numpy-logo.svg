@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="50" height="50">
+  <circle cx="50" cy="50" r="40" fill="#013243" stroke="#4DABCF" stroke-width="3"/>
+  <text x="50" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Num</text>
+  <text x="50" y="50" text-anchor="middle" fill="#4DABCF" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Py</text>
+  <rect x="30" y="55" width="40" height="8" fill="#4DABCF" rx="2"/>
+  <rect x="35" y="60" width="30" height="6" fill="white" rx="1"/>
+</svg> 

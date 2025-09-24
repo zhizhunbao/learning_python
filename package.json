@@ -1,0 +1,36 @@
+{
+  "name": "learning-python-presentation",
+  "version": "1.0.0",
+  "description": "Interactive web presentation for learning Python, NumPy, Pandas, and Matplotlib - CST8504 Group Project",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "serve": "npx http-server . -p 8000",
+    "dev": "npx live-server ."
+  },
+  "keywords": [
+    "python",
+    "numpy", 
+    "pandas",
+    "matplotlib",
+    "education",
+    "presentation",
+    "data-science",
+    "web",
+    "interactive"
+  ],
+  "author": "CST8504 Group Members",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/learning-python-presentation.git"
+  },
+  "homepage": "https://your-username.github.io/learning-python-presentation/",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+} 
