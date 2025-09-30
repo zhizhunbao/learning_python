@@ -737,7 +737,7 @@ print("恭喜！你刚刚构建了一个AI模型！🎉")`
                 en: `# ❌ This will cause IndentationError
 # if True:
 #     print("Missing indentation!")  # ERROR!
-#     print("Inconsistent!")     # ERROR!
+#       print("Inconsistent!")     # ERROR!
 
 # ❌ Mixed tabs and spaces (invisible nightmare!)
 # def calculate():
